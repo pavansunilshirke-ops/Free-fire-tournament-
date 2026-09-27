@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="mr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Free Fire Tournament</title>
+<style>
+body{margin:0;background:#0b1020;color:#fff;font-family:Arial,sans-serif}.wrap{max-width:600px;margin:auto;padding:16px}
+.card{background:#172033;padding:18px;border-radius:16px;margin:12px 0}h1,h2{margin-top:0}
+input,select,button{width:100%;padding:13px;margin:7px 0;border-radius:10px;border:0;box-sizing:border-box;font-size:16px}
+input,select{background:#26334a;color:#fff}button{background:#22c55e;color:#07120b;font-weight:bold;cursor:pointer}
+.tabs{display:flex;gap:8px}.tabs button{background:#334155;color:#fff}.hidden{display:none}
+.slot{display:inline-block;background:#0f172a;padding:8px 10px;border-radius:9px;margin:3px;font-size:13px}
+.item{background:#0f172a;padding:12px;border-radius:12px;margin:8px 0}.danger{background:#ef4444;color:#fff}
+small{color:#cbd5e1}.ok{color:#86efac;font-weight:bold}.pending{color:#facc15;font-weight:bold}
+</style></head>
+<body><div class="wrap">
+<div class="card">
+<h1>🔥 Free Fire Tournament</h1>
+<p>📅 29/09/2026 &nbsp; | &nbsp; 💰 Entry ₹40 &nbsp; | &nbsp; 👥 48 Slots</p>
+<p><b>UPI:</b> 9209909368@fam</p>
+</div>
+
+<div class="tabs">
+<button onclick="show('reg')">Registration</button>
+<button onclick="show('admin')">Admin</button>
+</div>
+
+<section id="reg" class="card">
+<h2>📝 Registration</h2>
+<form id="form">
+<input id="name" placeholder="Player Name" required>
+<input id="uid" placeholder="Free Fire UID" inputmode="numeric" required>
+<input id="team" placeholder="Team Name" required>
+<input id="phone" placeholder="WhatsApp / Contact" inputmode="tel" required>
+<input id="utr" placeholder="Payment UTR / Reference" required>
+<button>Register Now</button>
+</form>
+<p id="msg"></p>
+</section>
+
+<section id="admin" class="card hidden">
+<h2>🔐 Admin Panel</h2>
+<p><small>Demo password: <b>1234</b> — हे production security नाही.</small></p>
+<input id="pass" type="password" placeholder="Admin Password">
+<button onclick="login()">Open Admin</button>
+<div id="panel" class="hidden">
+<p id="count"></p>
+<div id="list"></div>
+<button class="danger" onclick="clearAll()">Clear All Registrations</button>
+</div>
+</section>
+
+<div class="card"><h2>🏆 Leaderboard</h2><div id="leader"></div>
+<small>Admin registrations आणि results याच browser/device मध्ये save होतात.</small></div>
+</div>
+<script>
+const KEY='ff_tournament_regs_v2';
+function data(){return JSON.parse(localStorage.getItem(KEY)||'[]')}
+function save(x){localStorage.setItem(KEY,JSON.stringify(x))}
+function show(id){document.getElementById('reg').classList.toggle('hidden',id!=='reg');document.getElementById('admin').classList.toggle('hidden',id!=='admin')}
+document.getElementById('form').onsubmit=e=>{
+ e.preventDefault();let a=data();if(a.length>=48){alert('48 slots full आहेत.');return}
+ let d={slot:a.length+1,name:name.value,uid:uid.value,team:team.value,phone:phone.value,utr:utr.value,status:'Pending',rank:'',kills:0};
+ a.push(d);save(a);e.target.reset();msg.innerHTML='<span class="ok">✅ Registration saved. Slot '+d.slot+'!</span>';render()
+};
+function login(){if(pass.value==='1234'){panel.classList.remove('hidden');renderAdmin()}else alert('Wrong password')}
+function renderAdmin(){let a=data();count.innerText='Registered: '+a.length+'/48';list.innerHTML=a.map((x,i)=>`<div class="item"><b>Slot ${x.slot} — ${x.team}</b><br>${x.name} | UID: ${x.uid}<br>Contact: ${x.phone}<br>UTR: ${x.utr}<br>Status: <select onchange="status(${i},this.value)"><option ${x.status==='Pending'?'selected':''}>Pending</option><option ${x.status==='Verified'?'selected':''}>Verified</option><option ${x.status==='Rejected'?'selected':''}>Rejected</option></select><br>Rank <input value="${x.rank}" onchange="rank(${i},this.value)" placeholder="Rank"> Kills <input type="number" min="0" value="${x.kills}" onchange="kills(${i},this.value)"></div>`).join('')||'No registrations yet.'}
+function status(i,v){let a=data();a[i].status=v;save(a);renderAdmin();render()}
+function rank(i,v){let a=data();a[i].rank=v;save(a);render()}
+function kills(i,v){let a=data();a[i].kills=Number(v)||0;save(a);render()}
+function clearAll(){if(confirm('सगळे registrations delete करायचे?')){localStorage.removeItem(KEY);renderAdmin();render()}}
+function render(){let a=data();leader.innerHTML=a.length?a.slice().sort((x,y)=>(Number(x.rank)||999)-(Number(y.rank)||999)).map(x=>`<div class="slot">#${x.rank||'-'} ${x.team} — ${x.kills} kills</div>`).join(''):'No results yet.'}
+render()
+</script></body></html>
